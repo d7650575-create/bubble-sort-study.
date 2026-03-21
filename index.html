@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Sort Visualizer | Образовательная платформа</title>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent: #00f2fe;
+            --text: #ffffff;
+            --idle-bg: #ffffff;
+            --idle-text: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(-45deg, #1e3c72, #2a5298, #2c5364, #0f2027);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            scroll-behavior: smooth;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; text-align: center; color: var(--accent); }
+        p { line-height: 1.7; margin-bottom: 15px; font-size: 1.1rem; }
+
+        /* Кнопка справки */
+        .help-btn {
+            position: fixed; top: 20px; right: 20px;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: var(--accent); border: none; cursor: pointer;
+            font-weight: bold; font-size: 26px; z-index: 1001;
+            box-shadow: 0 0 15px rgba(0,242,254,0.4);
+            transition: 0.3s;
+        }
+        .help-btn:hover { transform: rotate(15deg) scale(1.1); }
+
+        /* Консоль IDLE */
+        .idle-shell {
+            background: var(--idle-bg);
+            color: var(--idle-text);
+            border-radius: 12px;
+            font-family: 'Consolas', monospace;
+            border: 2px solid #888;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .idle-header { background: #d4d0c8; padding: 8px 15px; font-size: 0.85rem; border-bottom: 1px solid #888; color: #333; }
+        .idle-body { padding: 15px; min-height: 350px; }
+        #pythonEditor {
+            width: 100%; height: 180px; border: none; background: #fff;
+            font-family: 'Consolas', monospace; font-size: 1rem; outline: none;
+            border-bottom: 1px dashed #ccc; margin-bottom: 15px;
+        }
+        #consoleOutput { height: 120px; background: #fff; color: #000; overflow-y: auto; white-space: pre-wrap; font-size: 0.95rem; }
+
+        /* Симулятор */
+        #visual-area {
+            height: 300px; background: rgba(0,0,0,0.2); border-radius: 15px;
+            display: flex; align-items: flex-end; justify-content: center; gap: 8px; padding: 20px;
+        }
+        .bar { background: var(--accent); border-radius: 5px 5px 0 0; display: flex; align-items: flex-end; justify-content: center; color: #000; font-weight: bold; font-size: 0.8rem; }
+
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
+        button { padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: #0f2027; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        .code-style { background: #1e1e1e; padding: 20px; border-radius: 12px; font-family: 'Consolas', monospace; font-size: 0.95rem; line-height: 1.6; color: #d4d4d4; }
+
+        /* Модальное окно */
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 35px; border-radius: 20px; z-index: 2000; max-width: 500px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1999; }
+    </style>
+</head>
+<body>
+
+    <button class="help-btn" onclick="toggleModal(true)">?</button>
+
+    <section id="page1">
+        <div class="container" style="text-align: center;">
+            <h1>Bubble Sort Visualizer</h1>
+            <p style="font-size: 1.3rem; color: var(--accent); margin-bottom: 25px;">Интерактивный симулятор алгоритмов для современных подростков</p>
+            <p>Добро пожаловать в учебную среду. Здесь вы сможете освоить фундаментальные основы программирования, изучить классический алгоритм сортировки на языке Python и увидеть процесс обработки данных в режиме реального времени.</p>
+            <div style="margin-top: 60px; opacity: 0.6; font-style: italic;">Прокрутите страницу вниз, чтобы приступить к обучению ↓</div>
+        </div>
+    </section>
+
+    <section id="page2">
+        <div class="container">
+            <h2>Алгоритм сортировки пузырьком</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: justify;">
+                <div>
+                    <p><b>Суть метода:</b> Сортировка пузырьком (Bubble Sort) — это базовый алгоритм упорядочивания элементов. Его название обусловлено тем, что наибольшие значения постепенно «всплывают» в конец списка, подобно пузырькам воздуха в воде.</p>
+                    <p><b>Механика работы:</b> Алгоритм совершает несколько проходов по массиву. На каждом этапе сравниваются два соседних числа. Если порядок нарушен (левое больше правого), они меняются местами. Этот процесс повторяется до тех пор, пока весь массив не станет упорядоченным.</p>
+                </div>
+                <div>
+                    <p><b>Где это применяется:</b> Несмотря на простоту, алгоритм крайне важен для обучения. Он демонстрирует работу вложенных циклов и условных переходов. В промышленной разработке он используется для обучения ИИ или работы с уже почти отсортированными данными.</p>
+                    <p><b>Анализ сложности:</b> Временная сложность составляет $O(n^2)$. Это означает квадратичную зависимость: при увеличении количества данных в 3 раза, время обработки возрастет в 9 раз. Это делает алгоритм неэффективным для огромных массивов данных (Big Data).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page3">
+        <div class="container">
+            <h2>Программирование на языке Python</h2>
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px;">
+                <div>
+                    <p><b>Разбор программы шаг за шагом:</b></p>
+                    <div class="code-style">
+                        <span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">bubble_sort</span>(my_list): <span style="color: #6a9955;"># Создаем функцию, которая принимает список чисел</span> <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;n = <span style="color: #dcdcaa;">len</span>(my_list) <span style="color: #6a9955;"># Определяем длину массива (количество элементов)</span> <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c586c0;">for</span> i <span style="color: #c586c0;">in</span> <span style="color: #dcdcaa;">range</span>(n): <span style="color: #6a9955;"># Внешний цикл: отвечает за количество проходов</span> <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c586c0;">for</span> j <span style="color: #c586c0;">in</span> <span style="color: #dcdcaa;">range</span>(0, n - i - 1): <span style="color: #6a9955;"># Внутренний цикл: сравнение пар</span> <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c586c0;">if</span> my_list[j] > my_list[j+1]: <span style="color: #6a9955;"># Условие: если левый элемент больше правого</span> <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my_list[j], my_list[j+1] = my_list[j+1], my_list[j] <span style="color: #6a9955;"># Меняем их местами</span> <br>
+                        <br>
+                        numbers = [5, 2, 9] <span style="color: #6a9955;"># Вводим сам массив чисел для обработки</span><br>
+                        bubble_sort(numbers) <span style="color: #6a9955;"># Вызываем нашу функцию для этого массива</span>
+                    </div>
+                </div>
+                <div class="idle-shell">
+                    <div class="idle-header">Python 3.14.0 (64-bit) Shell</div>
+                    <div class="idle-body">
+                        <textarea id="pythonEditor" spellcheck="false" placeholder=">>> Напишите код здесь... например: print('Привет, мир!')"></textarea>
+                        <div id="consoleOutput">>>> </div>
+                        <button onclick="runPython()" style="width: 100%; margin-top: 10px; background: #ddd;">Запустить модуль (Run)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page4">
+        <div class="container">
+            <h2>Интерактивная визуализация</h2>
+            <div id="visual-area"></div>
+            <div id="status" style="margin: 20px 0; min-height: 25px; font-weight: bold; text-align: center;">Готов к началу сортировки.</div>
+            
+            <div class="controls">
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 0.9rem;">Ввод чисел через запятую:</label>
+                    <input type="text" id="nums" placeholder="Напр.: 15, 4, 22, 8" style="padding: 12px; border-radius: 8px; border: none; color: #000;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 0.9rem;">Скорость анимации:</label>
+                    <input type="range" id="speed" min="20" max="1500" value="500" style="cursor: pointer;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem;"><span>Быстро</span><span>Медленно</span></div>
+                </div>
+                <button onclick="customArr()">Загрузить данные</button>
+                <button onclick="randArr()" style="background: rgba(255,255,255,0.1); color: white;">Случайный массив</button>
+                <button onclick="startSort()" id="goBtn" style="grid-column: 1 / -1; background: var(--accent); color: #000;">ЗАПУСТИТЬ АЛГОРИТМ</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="page5">
+        <div class="container">
+            <h2>Обратная связь</h2>
+            <div style="background: white; border-radius: 20px; overflow: hidden; height: 600px;">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeSxQO0UxjulZOZW9-SpNANm8pLbdrAQ9LP6Ik32a5_G148JA/viewform?embedded=true" width="100%" height="600" frameborder="0">Загрузка…</iframe>
+            </div>
+        </div>
+    </section>
+
+    <div id="overlay" onclick="toggleModal(false)"></div>
+    <div id="modal">
+        <h3 style="color: #333;">О платформе</h3>
+        <p style="color: #666; font-size: 1rem;">Данный сайт является образовательным тренажером. Здесь вы можете:</p>
+        <ul style="color: #666; margin: 15px; font-size: 0.95rem; line-height: 1.6;">
+            <li>Изучить теорию алгоритмов.</li>
+            <li>Попрактиковаться в написании Python-кода.</li>
+            <li>Наглядно увидеть механику сортировки.</li>
+            <li>Настроить параметры визуализации (числа и скорость).</li>
+        </ul>
+        <button onclick="toggleModal(false)" style="width: 100%; margin-top: 15px;">Понятно!</button>
+    </div>
+
+    <script>
+        // ЛОГИКА КОНСОЛИ
+        function runPython() {
+            const code = document.getElementById('pythonEditor').value;
+            const output = document.getElementById('consoleOutput');
+            if(code.trim() === "") return;
+            
+            let result = "";
+            if(code.includes('print(')) {
+                let match = code.match(/print\(['"](.+?)['"]\)/);
+                result = match ? match[1] : "Ошибка синтаксиса";
+            } else {
+                result = "Код выполнен (без вывода в консоль)";
+            }
+            output.innerText += `\n${result}\n>>> `;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // ЛОГИКА ВИЗУАЛИЗАЦИИ
+        let data = [];
+        const stage = document.getElementById('visual-area');
+
+        function randArr() {
+            data = Array.from({length: 12}, () => Math.floor(Math.random() * 90) + 10);
+            draw();
+            document.getElementById('status').innerText = "Создан новый случайный массив.";
+        }
+
+        function customArr() {
+            const val = document.getElementById('nums').value;
+            if(!val) return alert("Введите числа через запятую!");
+            data = val.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            draw();
+            document.getElementById('status').innerText = "Пользовательские данные загружены.";
+        }
+
+        function draw(hilite = []) {
+            stage.innerHTML = '';
+            const max = Math.max(...data, 1);
+            data.forEach((v, i) => {
+                const b = document.createElement('div');
+                b.className = 'bar';
+                b.style.height = (v / max * 100) + '%';
+                b.style.width = (100 / data.length) + '%';
+                b.innerText = data.length < 18 ? v : '';
+                if(hilite.includes(i)) b.style.background = '#ff4757';
+                stage.appendChild(b);
+            });
+        }
+
+        async function startSort() {
+            const btn = document.getElementById('goBtn');
+            btn.disabled = true;
+            for(let i=0; i < data.length; i++) {
+                for(let j=0; j < data.length-i-1; j++) {
+                    const speed = 1520 - document.getElementById('speed').value; // Инверсия ползунка
+                    draw([j, j+1]);
+                    document.getElementById('status').innerText = `Сравниваем элементы: ${data[j]} и ${data[j+1]}`;
+                    await new Promise(r => setTimeout(r, speed));
+                    
+                    if(data[j] > data[j+1]) {
+                        [data[j], data[j+1]] = [data[j+1], data[j]];
+                        draw([j, j+1]);
+                        document.getElementById('status').innerText = `Порядок нарушен! Меняем ${data[j+1]} и ${data[j]} местами.`;
+                        await new Promise(r => setTimeout(r, speed));
+                    }
+                }
+            }
+            draw();
+            document.getElementById('status').innerText = "Сортировка успешно завершена!";
+            btn.disabled = false;
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal').style.display = show ? 'block' : 'none';
+            document.getElementById('overlay').style.display = show ? 'block' : 'none';
+        }
+
+        randArr(); // Инициализация
+    </script>
+</body>
+</html>
