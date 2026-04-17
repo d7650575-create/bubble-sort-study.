@@ -2,291 +2,220 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bubble Sort Visualizer | Образовательная платформа</title>
+    <meta name="viewport" content="width=1200">
+    <title>Индивидуальный проект | Сортировка пузырьком</title>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.11.0/brython_stdlib.js"></script>
+    
     <style>
-        :root {
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --accent: #00f2fe;
-            --text: #ffffff;
-            --idle-bg: #ffffff;
-            --idle-text: #000000;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            color: var(--text);
-            background: linear-gradient(-45deg, #1e3c72, #2a5298, #2c5364, #0f2027);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            scroll-behavior: smooth;
+            margin: 0; padding: 0;
+            background: linear-gradient(180deg, #3a92c8 0%, #1e5799 100%);
+            background-attachment: fixed;
+            color: white; scroll-behavior: smooth;
+            min-width: 1200px;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        section {
-            min-height: 100vh;
-            padding: 80px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid var(--glass-border);
-        }
+        section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; }
 
         .container {
-            max-width: 1100px;
-            width: 100%;
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            position: relative;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 30px; padding: 40px;
+            width: 1100px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
         }
 
-        h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; text-align: center; color: var(--accent); }
-        p { line-height: 1.7; margin-bottom: 15px; font-size: 1.1rem; }
+        h1 { font-size: 2.2rem; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 2px; }
+        h2 { color: #b2ebf2; font-size: 1.3rem; margin-top: 20px; text-align: left; }
+        p { line-height: 1.6; font-size: 1.1rem; margin-bottom: 15px; text-align: justify; }
 
-        /* Кнопка справки */
-        .help-btn {
-            position: fixed; top: 20px; right: 20px;
-            width: 50px; height: 50px; border-radius: 50%;
-            background: var(--accent); border: none; cursor: pointer;
-            font-weight: bold; font-size: 26px; z-index: 1001;
-            box-shadow: 0 0 15px rgba(0,242,254,0.4);
-            transition: 0.3s;
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+
+        .code-block {
+            background: #1a1c23; color: #d4d4d4; padding: 25px;
+            border-radius: 15px; font-family: 'Consolas', monospace;
+            font-size: 0.9rem; text-align: left; line-height: 1.4; overflow-x: auto;
         }
-        .help-btn:hover { transform: rotate(15deg) scale(1.1); }
+        .keyword { color: #569cd6; }
+        .comment { color: #6a9955; }
 
-        /* Консоль IDLE */
-        .idle-shell {
-            background: var(--idle-bg);
-            color: var(--idle-text);
-            border-radius: 12px;
-            font-family: 'Consolas', monospace;
-            border: 2px solid #888;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .idle-header { background: #d4d0c8; padding: 8px 15px; font-size: 0.85rem; border-bottom: 1px solid #888; color: #333; }
-        .idle-body { padding: 15px; min-height: 350px; }
-        #pythonEditor {
-            width: 100%; height: 180px; border: none; background: #fff;
-            font-family: 'Consolas', monospace; font-size: 1rem; outline: none;
-            border-bottom: 1px dashed #ccc; margin-bottom: 15px;
-        }
-        #consoleOutput { height: 120px; background: #fff; color: #000; overflow-y: auto; white-space: pre-wrap; font-size: 0.95rem; }
+        .shell-box { background: #f0f2f5; color: #333; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; }
+        .shell-header { padding: 10px 15px; background: #e2e8f0; font-size: 0.85rem; font-weight: bold; border-bottom: 1px solid #cbd5e0; text-align: left; }
+        #pythonInput { width: 100%; height: 280px; padding: 15px; border: none; font-family: 'Consolas', monospace; resize: none; outline: none; background: #fff; box-sizing: border-box; }
+        #shellOutput { background: #fff; padding: 15px; min-height: 80px; font-family: 'Consolas', monospace; border-top: 1px dashed #cbd5e0; color: #1a202c; text-align: left; white-space: pre-wrap; }
+        .run-btn { background: #4dd0e1; color: #004d40; border: none; padding: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
 
-        /* Симулятор */
-        #visual-area {
-            height: 300px; background: rgba(0,0,0,0.2); border-radius: 15px;
-            display: flex; align-items: flex-end; justify-content: center; gap: 8px; padding: 20px;
-        }
-        .bar { background: var(--accent); border-radius: 5px 5px 0 0; display: flex; align-items: flex-end; justify-content: center; color: #000; font-weight: bold; font-size: 0.8rem; }
-
-        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
-        button { padding: 14px; border-radius: 10px; border: none; background: var(--accent); color: #0f2027; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
-
-        .code-style { background: #1e1e1e; padding: 20px; border-radius: 12px; font-family: 'Consolas', monospace; font-size: 0.95rem; line-height: 1.6; color: #d4d4d4; }
-
-        /* Модальное окно */
-        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: #333; padding: 35px; border-radius: 20px; z-index: 2000; max-width: 500px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1999; }
+        .visual-area { background: rgba(0,0,0,0.2); border-radius: 20px; height: 350px; display: flex; align-items: flex-end; justify-content: center; gap: 10px; padding: 20px; margin-top: 15px; }
+        .bar { background: #4dd0e1; border: 1px solid rgba(255,255,255,0.2); flex: 1; max-width: 55px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; }
+        
+        #statusText { font-weight: bold; margin-bottom: 10px; color: #b2ebf2; font-size: 1.3rem; min-height: 1.5rem; }
+        .speed-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0; }
+        .btn-action { background: #4dd0e1; color: #004d40; border: none; padding: 15px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
-<body>
+<body onload="brython()">
 
-    <button class="help-btn" onclick="toggleModal(true)">?</button>
-
-    <section id="page1">
-        <div class="container" style="text-align: center;">
-            <h1>Bubble Sort Visualizer</h1>
-            <p style="font-size: 1.3rem; color: var(--accent); margin-bottom: 25px;">Интерактивный симулятор алгоритмов для современных подростков</p>
+    <section>
+        <div class="container">
+            <h1>BUBBLE SORT VISUALIZER</h1>
+            <p style="color: #b2ebf2; font-size: 1.2rem; text-align: center;">Интерактивный симулятор алгоритмов для современных подростков</p>
             <p>Добро пожаловать в учебную среду. Здесь вы сможете освоить фундаментальные основы программирования, изучить классический алгоритм сортировки на языке Python и увидеть процесс обработки данных в режиме реального времени.</p>
-            <div style="margin-top: 60px; opacity: 0.6; font-style: italic;">Прокрутите страницу вниз, чтобы приступить к обучению ↓</div>
         </div>
     </section>
 
-    <section id="page2">
+    <section>
         <div class="container">
-            <h2>Алгоритм сортировки пузырьком</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: justify;">
+            <h1>АЛГОРИТМ СОРТИРОВКИ ПУЗЫРЬКОМ</h1>
+            <div class="grid">
                 <div>
-                    <p><b>Суть метода:</b> Сортировка пузырьком (Bubble Sort) — это базовый алгоритм упорядочивания элементов. Его название обусловлено тем, что наибольшие значения постепенно «всплывают» в конец списка, подобно пузырькам воздуха в воде.</p>
-                    <p><b>Механика работы:</b> Алгоритм совершает несколько проходов по массиву. На каждом этапе сравниваются два соседних числа. Если порядок нарушен (левое больше правого), они меняются местами. Этот процесс повторяется до тех пор, пока весь массив не станет упорядоченным.</p>
+                    <h2>Суть метода:</h2>
+                    <p>Сортировка пузырьком (Bubble Sort) — это базовый алгоритм упорядочивания элементов. Его название обусловлено тем, что наибольшие значения постепенно «всплывают» в конец списка, подобно пузырькам воздуха в воде.</p>
+                    <h2>Механика работы:</h2>
+                    <p>Алгоритм совершает несколько проходов по массиву. На каждом этапе сравниваются два соседних числа. Если порядок нарушен (левое больше правого), они меняются местами. Этот процесс повторяется до тех пор, пока весь массив не станет упорядоченным.</p>
                 </div>
                 <div>
-                    <p><b>Где это применяется:</b> Несмотря на простоту, алгоритм крайне важен для обучения. Он демонстрирует работу вложенных циклов и условных переходов. В промышленной разработке он используется для обучения ИИ или работы с уже почти отсортированными данными.</p>
-                    <p><b>Анализ сложности:</b> Временная сложность составляет $O(n^2)$. Это означает квадратичную зависимость: при увеличении количества данных в 3 раза, время обработки возрастет в 9 раз. Это делает алгоритм неэффективным для огромных массивов данных (Big Data).</p>
+                    <h2>Где это применяется:</h2>
+                    <p>Несмотря на простоту, алгоритм крайне важен для обучения. Он демонстрирует работу вложенных циклов и условных переходов. В промышленной разработке он используется для обучения ИИ или работы с уже почти отсортированными данными.</p>
+                    <h2>Анализ сложности:</h2>
+                    <p>Временная сложность составляет O(n^2). Это означает квадратичную зависимость: при увеличении количества данных в 3 раза, время обработки возрастет в 9 раз. Это делает алгоритм неэффективным для огромных массивов данных (Big Data).</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="page3">
+    <section>
         <div class="container">
-            <h2>Программирование на языке Python</h2>
-            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px;">
-                <div>
-                    <p><b>Разбор программы шаг за шагом:</b></p>
-                    <div class="code-style">
-                        <span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">bubble_sort</span>(my_list): <span style="color: #6a9955;"># Создаем функцию, которая принимает список чисел</span> <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;n = <span style="color: #dcdcaa;">len</span>(my_list) <span style="color: #6a9955;"># Определяем длину массива (количество элементов)</span> <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c586c0;">for</span> i <span style="color: #c586c0;">in</span> <span style="color: #dcdcaa;">range</span>(n): <span style="color: #6a9955;"># Внешний цикл: отвечает за количество проходов</span> <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c586c0;">for</span> j <span style="color: #c586c0;">in</span> <span style="color: #dcdcaa;">range</span>(0, n - i - 1): <span style="color: #6a9955;"># Внутренний цикл: сравнение пар</span> <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #c586c0;">if</span> my_list[j] > my_list[j+1]: <span style="color: #6a9955;"># Условие: если левый элемент больше правого</span> <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my_list[j], my_list[j+1] = my_list[j+1], my_list[j] <span style="color: #6a9955;"># Меняем их местами</span> <br>
-                        <br>
-                        numbers = [5, 2, 9] <span style="color: #6a9955;"># Вводим сам массив чисел для обработки</span><br>
-                        bubble_sort(numbers) <span style="color: #6a9955;"># Вызываем нашу функцию для этого массива</span>
-                    </div>
+            <h1>ПРОГРАММИРОВАНИЕ И IDLE SHELL</h1>
+            <div class="grid">
+                <div class="code-block">
+                    <span class="keyword">from</span> random <span class="keyword">import</span> randint <span class="comment"># Подключаем инструмент для случайных чисел</span><br>
+                    n = <span style="color:#b5cea8">20</span> <span class="comment"># Размер нашего списка</span><br>
+                    num = [] <span class="comment"># Создаем пустую "коробку" для чисел</span><br>
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(n): <span class="comment"># Повторяем n раз</span><br>
+                    &nbsp;&nbsp;num.append(randint(<span style="color:#b5cea8">0, 100</span>)) <span class="comment"># Кладем случайное число от 0 до 100</span><br>
+                    <span class="keyword">print</span>(num) <span class="comment"># Показываем список до сортировки</span><br><br>
+                    <span class="keyword">for</span> i <span class="keyword">in</span> range(n - <span style="color:#b5cea8">1</span>): <span class="comment"># Проходим по списку n-1 раз</span><br>
+                    &nbsp;&nbsp;<span class="keyword">for</span> j <span class="keyword">in</span> range(n - i - <span style="color:#b5cea8">1</span>): <span class="comment"># Сравниваем пары чисел</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> num[j] > num[j + <span style="color:#b5cea8">1</span>]: <span class="comment"># Если левое больше правого...</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;num[j], num[j+1] = num[j+1], num[j] <span class="comment"># ...меняем их местами</span><br><br>
+                    <span class="keyword">print</span>(num) <span class="comment"># Показываем результат</span>
                 </div>
-                <div class="idle-shell">
-                    <div class="idle-header">Python 3.14.0 (64-bit) Shell</div>
-                    <div class="idle-body">
-                        <textarea id="pythonEditor" spellcheck="false" placeholder=">>> Напишите код здесь... например: print('Привет, мир!')"></textarea>
-                        <div id="consoleOutput">>>> </div>
-                        <button onclick="runPython()" style="width: 100%; margin-top: 10px; background: #ddd;">Запустить модуль (Run)</button>
-                    </div>
+
+                <div class="shell-box">
+                    <div class="shell-header">Python Shell (IDLE Mode)</div>
+                    <textarea id="pythonInput" spellcheck="false">from random import randint
+n = 20
+num = []
+for i in range(n):
+    num.append(randint(0, 100))
+print("До сортировки:", num)
+
+for i in range(n - 1):
+    for j in range(n - i - 1):
+        if num[j] > num[j + 1]:
+            num[j], num[j+1] = num[j+1], num[j]
+
+print("После сортировки:", num)</textarea>
+                    <div id="shellOutput">>>> Нажми Run Module для запуска...</div>
+                    <button class="run-btn" onclick="brython({debug:1}); document.dispatchEvent(new CustomEvent('run-python'))">Run Module (F5)</button>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="page4">
+    <section>
         <div class="container">
-            <h2>Интерактивная визуализация</h2>
-            <div id="visual-area"></div>
-            <div id="status" style="margin: 20px 0; min-height: 25px; font-weight: bold; text-align: center;">Готов к началу сортировки.</div>
+            <h1>ИНТЕРАКТИВНАЯ ВИЗУАЛИЗАЦИЯ</h1>
+            <div id="statusText">Готов к работе</div>
+            <div class="visual-area" id="area"></div>
             
-            <div class="controls">
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <label style="font-size: 0.9rem;">Ввод чисел через запятую:</label>
-                    <input type="text" id="nums" placeholder="Напр.: 15, 4, 22, 8" style="padding: 12px; border-radius: 8px; border: none; color: #000;">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <label style="font-size: 0.9rem;">Скорость анимации:</label>
-                    <input type="range" id="speed" min="20" max="1500" value="500" style="cursor: pointer;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem;"><span>Быстро</span><span>Медленно</span></div>
-                </div>
-                <button onclick="customArr()">Загрузить данные</button>
-                <button onclick="randArr()" style="background: rgba(255,255,255,0.1); color: white;">Случайный массив</button>
-                <button onclick="startSort()" id="goBtn" style="grid-column: 1 / -1; background: var(--accent); color: #000;">ЗАПУСТИТЬ АЛГОРИТМ</button>
+            <div class="speed-row">
+                <span style="font-weight: bold;">Быстро</span>
+                <input type="range" id="speed" min="50" max="1500" value="700">
+                <span style="font-weight: bold;">Медленно</span>
             </div>
+
+            <div class="grid" style="grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+                <input type="text" id="userInput" placeholder="Числа через запятую..." style="margin-bottom:0; padding: 15px; border-radius:10px; border:none;">
+                <button class="btn-action" onclick="loadCustom()">Загрузить</button>
+                <button class="btn-action" onclick="generateRandom()">Рандом</button>
+            </div>
+            <button id="startBtn" onclick="bubbleSort()" style="width:100%; margin-top:15px; background:#b2ebf2; padding:20px; border:none; border-radius:15px; font-weight:bold; cursor:pointer; font-size:1.1rem;">ЗАПУСТИТЬ АЛГОРИТМ</button>
         </div>
     </section>
 
-    <section id="page5">
+    <section>
         <div class="container">
-            <h2>Обратная связь</h2>
-            <div style="background: white; border-radius: 20px; overflow: hidden; height: 600px;">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeSxQO0UxjulZOZW9-SpNANm8pLbdrAQ9LP6Ik32a5_G148JA/viewform?embedded=true" width="100%" height="600" frameborder="0">Загрузка…</iframe>
-            </div>
+            <h1>ОБРАТНАЯ СВЯЗЬ</h1>
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeSxQO0UxjulZOZW9-SpNANm8pLbdrAQ9LP6Ik32a5_G148JA/viewform?embedded=true" width="100%" height="550" frameborder="0" style="background:white; border-radius:20px;">Загрузка…</iframe>
         </div>
     </section>
-
-    <div id="overlay" onclick="toggleModal(false)"></div>
-    <div id="modal">
-        <h3 style="color: #333;">О платформе</h3>
-        <p style="color: #666; font-size: 1rem;">Данный сайт является образовательным тренажером. Здесь вы можете:</p>
-        <ul style="color: #666; margin: 15px; font-size: 0.95rem; line-height: 1.6;">
-            <li>Изучить теорию алгоритмов.</li>
-            <li>Попрактиковаться в написании Python-кода.</li>
-            <li>Наглядно увидеть механику сортировки.</li>
-            <li>Настроить параметры визуализации (числа и скорость).</li>
-        </ul>
-        <button onclick="toggleModal(false)" style="width: 100%; margin-top: 15px;">Понятно!</button>
-    </div>
 
     <script>
-        // ЛОГИКА КОНСОЛИ
-        function runPython() {
-            const code = document.getElementById('pythonEditor').value;
-            const output = document.getElementById('consoleOutput');
-            if(code.trim() === "") return;
-            
-            let result = "";
-            if(code.includes('print(')) {
-                let match = code.match(/print\(['"](.+?)['"]\)/);
-                result = match ? match[1] : "Ошибка синтаксиса";
-            } else {
-                result = "Код выполнен (без вывода в консоль)";
-            }
-            output.innerText += `\n${result}\n>>> `;
-            output.scrollTop = output.scrollHeight;
-        }
+        let data = [28, 3, 4, 1, 25];
+        const status = document.getElementById('statusText');
 
-        // ЛОГИКА ВИЗУАЛИЗАЦИИ
-        let data = [];
-        const stage = document.getElementById('visual-area');
-
-        function randArr() {
-            data = Array.from({length: 12}, () => Math.floor(Math.random() * 90) + 10);
-            draw();
-            document.getElementById('status').innerText = "Создан новый случайный массив.";
-        }
-
-        function customArr() {
-            const val = document.getElementById('nums').value;
-            if(!val) return alert("Введите числа через запятую!");
-            data = val.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            draw();
-            document.getElementById('status').innerText = "Пользовательские данные загружены.";
-        }
-
-        function draw(hilite = []) {
-            stage.innerHTML = '';
+        function render(hi = []) {
+            const area = document.getElementById('area');
+            area.innerHTML = '';
             const max = Math.max(...data, 1);
             data.forEach((v, i) => {
-                const b = document.createElement('div');
-                b.className = 'bar';
-                b.style.height = (v / max * 100) + '%';
-                b.style.width = (100 / data.length) + '%';
-                b.innerText = data.length < 18 ? v : '';
-                if(hilite.includes(i)) b.style.background = '#ff4757';
-                stage.appendChild(b);
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = (v/max * 100) + '%';
+                bar.innerText = v;
+                if(hi.includes(i)) bar.style.background = '#ff5252';
+                area.appendChild(bar);
             });
         }
 
-        async function startSort() {
-            const btn = document.getElementById('goBtn');
-            btn.disabled = true;
-            for(let i=0; i < data.length; i++) {
-                for(let j=0; j < data.length-i-1; j++) {
-                    const speed = 1520 - document.getElementById('speed').value; // Инверсия ползунка
-                    draw([j, j+1]);
-                    document.getElementById('status').innerText = `Сравниваем элементы: ${data[j]} и ${data[j+1]}`;
-                    await new Promise(r => setTimeout(r, speed));
-                    
+        function generateRandom() { data = Array.from({length: 8}, () => Math.floor(Math.random()*90)+10); render(); }
+        function loadCustom() { const v = document.getElementById('userInput').value; if(v) { data = v.split(',').map(Number).filter(n=>!isNaN(n)); render(); } }
+
+        async function bubbleSort() {
+            const btn = document.getElementById('startBtn'); btn.disabled = true;
+            for(let i=0; i<data.length; i++) {
+                for(let j=0; j<data.length-i-1; j++) {
+                    status.innerText = `Сравниваем ${data[j]} и ${data[j+1]}...`;
+                    render([j, j+1]);
+                    await new Promise(r => setTimeout(r, document.getElementById('speed').value));
                     if(data[j] > data[j+1]) {
+                        status.innerText = `Меняем местами ${data[j]} и ${data[j+1]}`;
                         [data[j], data[j+1]] = [data[j+1], data[j]];
-                        draw([j, j+1]);
-                        document.getElementById('status').innerText = `Порядок нарушен! Меняем ${data[j+1]} и ${data[j]} местами.`;
-                        await new Promise(r => setTimeout(r, speed));
+                        render([j, j+1]);
+                        await new Promise(r => setTimeout(r, document.getElementById('speed').value));
                     }
                 }
             }
-            draw();
-            document.getElementById('status').innerText = "Сортировка успешно завершена!";
-            btn.disabled = false;
+            status.innerText = "Сортировка завершена успешно!";
+            btn.disabled = false; render();
         }
+        render();
+    </script>
 
-        function toggleModal(show) {
-            document.getElementById('modal').style.display = show ? 'block' : 'none';
-            document.getElementById('overlay').style.display = show ? 'block' : 'none';
-        }
+    <script type="text/python">
+        from browser import document
 
-        randArr(); // Инициализация
+        def run_python_code(ev):
+            output_div = document["shellOutput"]
+            output_div.text = ""
+            class Out:
+                def write(self, data):
+                    output_div.text += str(data)
+            import sys
+            sys.stdout = Out()
+            code = document["pythonInput"].value
+            try:
+                exec(code)
+            except Exception as e:
+                output_div.text = f"Ошибка: {e}"
+
+        document.bind("run-python", run_python_code)
     </script>
 </body>
 </html>
